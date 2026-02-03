@@ -82,7 +82,7 @@ class ArticleRepository implements ArticleRepositoryInterface
     {
         try {
             $query = $this->model->with(['source', 'category', 'author']);
-            dd($filters['keyword']);
+
             // Search by keyword using PostgreSQL full-text search
             $query->when(!empty($filters['keyword']), function ($q) use ($filters) {
                 $keyword = $filters['keyword'];
