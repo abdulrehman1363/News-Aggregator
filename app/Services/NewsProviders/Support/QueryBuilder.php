@@ -27,26 +27,6 @@ class QueryBuilder
     }
 
     /**
-     * Add a parameter with a custom condition
-     */
-    public function addWhen(bool $condition, string $key, mixed $value): self
-    {
-        if ($condition) {
-            $this->params[$key] = $value;
-        }
-        return $this;
-    }
-
-    /**
-     * Add multiple parameters at once
-     */
-    public function merge(array $params): self
-    {
-        $this->params = array_merge($this->params, $params);
-        return $this;
-    }
-
-    /**
      * Get all parameters as array
      */
     public function toArray(): array
