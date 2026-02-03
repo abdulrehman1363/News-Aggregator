@@ -6,7 +6,7 @@ use App\Repositories\Contracts\ArticleRepositoryInterface;
 use App\Repositories\Contracts\AuthorRepositoryInterface;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\SourceRepositoryInterface;
-use App\Services\NewsProviders\NewsProviderInterface;
+use App\Services\NewsProviders\Contracts\NewsProviderInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +43,7 @@ class ArticleService
 
             // Fetch articles from the provider
             $articlesData = $provider->fetchArticles($params);
-            
+
             if (empty($articlesData)) {
                 Log::info("No articles fetched from {$source->name}");
                 return 0;
@@ -87,17 +87,17 @@ class ArticleService
         try {
             // Filter out invalid articles and get existing URLs
             $validArticles = array_filter($articlesData, fn($article) => !empty($article['url']));
-            
+
             if (empty($validArticles)) {
                 return 0;
             }
 
             $urls = array_column($validArticles, 'url');
             $existingUrls = $this->articleRepository->getExistingUrls($urls);
-            
+
             // Filter out existing articles
             $newArticles = array_filter($validArticles, fn($article) => !in_array($article['url'], $existingUrls));
-            
+
             if (empty($newArticles)) {
                 Log::info("All articles already exist in database");
                 return 0;
@@ -161,7 +161,7 @@ class ArticleService
     private function prepareAuthors(array $articles): array
     {
         $authorNames = [];
-        
+
         foreach ($articles as $article) {
             if (!empty($article['author_name'])) {
                 $authorNames[] = trim($article['author_name']);
@@ -173,7 +173,7 @@ class ArticleService
         }
 
         $authorNames = array_unique($authorNames);
-        
+
         // Get existing authors
         $existingAuthors = $this->authorRepository->getByNames($authorNames)
             ->keyBy(fn($author) => strtolower($author->name));
@@ -215,7 +215,7 @@ class ArticleService
     private function prepareCategories(array $articles): array
     {
         $categoryNames = [];
-        
+
         foreach ($articles as $article) {
             if (!empty($article['category'])) {
                 $categoryNames[] = trim($article['category']);
@@ -228,8 +228,8 @@ class ArticleService
 
         $categoryNames = array_unique($categoryNames);
         $categorySlugs = array_map(fn($name) => Str::slug($name), $categoryNames);
-        
-        // Get existing categories (assuming we add a method to get by slugs)
+
+        // Get existing categories
         $existingCategories = $this->categoryRepository->all()
             ->filter(fn($cat) => in_array($cat->slug, $categorySlugs))
             ->keyBy('slug');
@@ -257,7 +257,7 @@ class ArticleService
             $newCategorySlugs = array_column($newCategories, 'slug');
             $fetchedCategories = $this->categoryRepository->all()
                 ->filter(fn($cat) => in_array($cat->slug, $newCategorySlugs));
-            
+
             foreach ($fetchedCategories as $category) {
                 $existingCategories[$category->slug] = $category;
             }

@@ -4,6 +4,7 @@ namespace App\Services\NewsProviders;
 
 use App\Facades\Http;
 use App\Services\NewsProviders\Config\ProviderConfig;
+use App\Services\NewsProviders\Contracts\NewsProviderInterface;
 use App\Services\NewsProviders\Support\QueryBuilder;
 use Illuminate\Support\Facades\Log;
 
