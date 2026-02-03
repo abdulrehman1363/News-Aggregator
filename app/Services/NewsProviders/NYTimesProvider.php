@@ -32,7 +32,7 @@ class NYTimesProvider implements NewsProviderInterface
                 ->add('api-key', $this->config->apiKey)
                 ->addIfPresent('q', $params['keyword'] ?? null);
 
-            // Add date filters with NYTimes-specific format (YYYYMMDD)
+            // Add date filters
             if (!empty($params['from'])) {
                 $queryBuilder->add('begin_date', str_replace('-', '', $params['from']));
             }
@@ -135,7 +135,7 @@ class NYTimesProvider implements NewsProviderInterface
         if (!empty($article['byline']['person']) && is_array($article['byline']['person']) && count($article['byline']['person']) > 0) {
             $person = $article['byline']['person'][0];
             $name = trim(($person['firstname'] ?? '') . ' ' . ($person['lastname'] ?? ''));
-            
+
             if (!empty($name)) {
                 return $name;
             }
